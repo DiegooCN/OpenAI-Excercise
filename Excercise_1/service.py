@@ -13,5 +13,5 @@ def get_date():
     url = os.environ.get('DATE_API_URL')
     response = requests.get(url)
     date = response.json()
-    return {"date": date['fecha_actual']}
+    return json.dumps(date)
 
