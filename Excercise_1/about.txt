@@ -1,0 +1,2 @@
+This excercise consist in consume an external API and 
+give it to the openAI implementing "tool_calls".
