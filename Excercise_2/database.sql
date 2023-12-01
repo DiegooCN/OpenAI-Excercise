@@ -6,5 +6,5 @@ CREATE TABLE CHAT_HISTORY (
     user_id INT,
     content VARCHAR(100),
     role VARCHAR(20),
-    date DATETIME
+    date DATETIME DEFAULT CURRENT_TIMESTAMP(6)
 )

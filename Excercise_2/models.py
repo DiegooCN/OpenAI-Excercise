@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 
 class User(BaseModel):
-    id: str = "1"
-    name: str = "Diego"
-    message: str = "Hola"
+    id: str
+    name: str
+    message: str
 
 class Context(BaseModel):
     user: User

@@ -4,15 +4,19 @@ import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
-from database import isUser
-from models import User
+from database import isUser, saveMessage
+from models import User, Context
 from service import get_date
 
+# Load the environment variables
 load_dotenv()
+env = {
+    "OPENAI_API_KEY" : os.environ.get('OPENAI_API_KEY')
+}
 
 app = fastapi.FastAPI()
 
-openai = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+openai = OpenAI(api_key=env["OPENAI_API_KEY"])
 
 @app.post("/send-response")
 def send_message(user: User):
@@ -50,6 +54,9 @@ def send_message(user: User):
     response_messages = response.choices[0].message
     tool_calls = response.choices[0].message.tool_calls
 
+    context = Context(user=user, content=response_messages.content, role=response_messages.role, function="a")
+    saveMessage(context)    
+
     if tool_calls:
 
         available_tools = {
@@ -70,8 +77,12 @@ def send_message(user: User):
             messages=messages
         )
         
+        context.content = final_response.choices[0].message.content
+        context.role = final_response.choices[0].message.role
+        saveMessage(context)
+
         return final_response
 
     else:
-        return response_messages 
+        return response 
 
