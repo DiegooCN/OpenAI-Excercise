@@ -1,12 +1,13 @@
+from typing import Optional
 from pydantic import BaseModel
 
 class User(BaseModel):
-    id: str
+    dni: str
     name: str
     message: str
 
 class Context(BaseModel):
     user: User
-    content: str
-    role: str
-    function: str
+    content: Optional[str] = None
+    role: Optional[str] = None
+    function: Optional[str] = None

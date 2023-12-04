@@ -1,4 +1,3 @@
-import json
 import mysql.connector
 import os
 
@@ -29,7 +28,7 @@ def isUser(user:User):
     mydb = connection()
     mycursor = mydb.cursor()
 
-    sql = f"SELECT COUNT(user_id) FROM CHAT_HISTORY WHERE user_id = {user.id};"
+    sql = f"SELECT COUNT(dni) FROM CHAT_HISTORY WHERE dni = '{user.dni}';"
     mycursor.execute(sql)
     myresult = mycursor.fetchall()
     
@@ -45,7 +44,7 @@ def saveMessage(context:Context):
     mydb = connection()
     mycursor = mydb.cursor()
 
-    sql = f"INSERT INTO CHAT_HISTORY(user_id,content,role,date) VALUES ('{context.user.id}','{context.content}', '{context.role}', NOW());"
+    sql = f"INSERT INTO CHAT_HISTORY(dni,content,role,date) VALUES ('{context.user.dni}','{context.content}', '{context.role}', NOW());"
     mycursor.execute(sql)
     mydb.commit()
 
@@ -54,13 +53,22 @@ def saveMessage(context:Context):
 @app.post("/get-messages")
 def getMessages(user:User):
 
+    result = []
+
     mydb = connection()
     mycursor = mydb.cursor()
 
-    sql = f"SELECT role, content FROM CHAT_HISTORY WHERE user_id = '{user.id}' ORDER BY date ASC;"
+    sql = f"SELECT role, content FROM CHAT_HISTORY WHERE dni = '{user.dni}' ORDER BY date ASC;"
     mycursor.execute(sql)
     myresult = mycursor.fetchall()
 
     mydb.close()
 
-    return json.dumps(myresult)
+    for message in myresult:
+        dict = {
+            "role" : message[0],
+            "content" : message[1]
+        }
+        result.append(dict)
+
+    return result

@@ -1,10 +1,9 @@
-import uuid
 import fastapi
 import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
-from database import isUser, saveMessage
+from database import getMessages, saveMessage
 from models import User, Context
 from service import get_date
 
@@ -21,15 +20,25 @@ openai = OpenAI(api_key=env["OPENAI_API_KEY"])
 @app.post("/send-response")
 def send_message(user: User):
 
-    user.id = user.id if isUser(user) else str(uuid.uuid4())
+    context = Context(user=user)
 
-    behavior = f'Eres una agente virtual llamada MIA y tu objetivo es decir la fecha a {user.name}'
-
-    messages=[
-            {"role": "system" , "content" : behavior},
-            {"role": "user" , "content" : user.message}
-        ]
+    behavior = 'Eres una agente virtual llamada MIA, tu función es responder las preguntas de los usuarios'
     
+    chat_history = [
+            {"role": "system" , "content" : behavior},
+    ]
+
+    messages_to_add = getMessages(user)
+
+    for message in messages_to_add:
+        chat_history.append({
+            "role": message["role"],
+            "content": message["content"],
+        })
+    messages= {"role": "user" , "content" : user.message}
+        
+    chat_history.append(messages)
+
     tools=[
             {
                 "type": "function",
@@ -46,7 +55,7 @@ def send_message(user: User):
     
     response = openai.chat.completions.create(
         model="gpt-3.5-turbo-1106",
-        messages=messages,
+        messages=chat_history,
         tools=tools,
         tool_choice="auto"
     )
@@ -54,8 +63,9 @@ def send_message(user: User):
     response_messages = response.choices[0].message
     tool_calls = response.choices[0].message.tool_calls
 
-    context = Context(user=user, content=response_messages.content, role=response_messages.role, function="a")
-    saveMessage(context)    
+    context.content = user.message
+    context.role = "user"
+    saveMessage(context)
 
     if tool_calls:
 
@@ -67,14 +77,14 @@ def send_message(user: User):
             tool_name = tool_call.function.name
             tool_to_call = available_tools[tool_name]
             tool_response = tool_to_call
-            messages.append({
+            chat_history.append({
                     "role": "system",
                     "content": tool_response,
             })
 
         final_response = openai.chat.completions.create(
             model="gpt-3.5-turbo-1106",
-            messages=messages
+            messages=chat_history
         )
         
         context.content = final_response.choices[0].message.content
@@ -84,5 +94,10 @@ def send_message(user: User):
         return final_response
 
     else:
+
+        context.content = response_messages.content
+        context.role = response_messages.role
+        saveMessage(context)
+        
         return response 
 
