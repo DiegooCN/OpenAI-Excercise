@@ -1,7 +1,7 @@
 import os
 import json
 
-from functions import say_hello , out_of_context , show_options , get_method_payment_locations , get_receipt, say_goodbye, get_debt_detail, ask_dni
+from functions import say_hello , out_of_context , get_method_payment_locations , get_receipt, say_goodbye, get_debt_detail, ask_dni
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -9,13 +9,16 @@ load_dotenv()
 
 openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-behavior = """Eres un asistente de Movistar y debes hacer lo siguiente:\
-    - Identificar el contexto de la conversación.\
-    - Saludar al usuario cada vez que empieza una conversación o cuando el usuario lo solicite.\
-    - Solicitar su DNI para continuar con las consultas.
-    - Responder siempre utilizando una {function} que se adecue al contexto de la conversación.
-    - Despedirse del usuario cuando este lo solicite.
-    """
+behavior = """Eres un asistente de Movistar y debes seguir las siguientes fases en orden: \
+    > Fase 1: \
+        - Saludar al usuario al comienzo de la conversación. \
+        - Solicitar su DNI para continuar con las consultas. \
+        - Validar el DNI ingresado por el usuario. \
+    > Fase 2: \
+        - Responder lo que pide el usuario teniendo en cuenta el contexto de la conversación. \
+        - Utilizar solo las funciones que se indican. \
+    > Fase 3: \
+        - Despedirse del usuario cuando este lo solicite."""
 
 messages = [
     {"role": "system", "content": behavior},
@@ -24,15 +27,12 @@ messages = [
 functions = {
         "say_hello": say_hello(),
         "out_of_context": out_of_context(),
-        "show_options": show_options(),
         "get_method_payment_locations": get_method_payment_locations(),
         "get_receipt": get_receipt(),
         "say_goodbye": say_goodbye(),
         "get_debt_detail": get_debt_detail,
         "ask_dni": ask_dni(),
     }
-
-
 
 def get_completion(messages):
 
@@ -53,17 +53,6 @@ def get_completion(messages):
             "function": {
                 "name": "out_of_context",
                 "description": "Cuando el usuario pregunta algo que no está dentro de las funciones que el bot puede realizar responde con este mensaje",
-                "parameters": {
-                    "type": "object",
-                    "properties": {}
-                },
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "show_options",
-                "description": "Muestra las funciones disponibles las cuales el bot puede realizar",
                 "parameters": {
                     "type": "object",
                     "properties": {}
@@ -156,9 +145,6 @@ def get_completion(messages):
                 tool_response = tool_to_call
                 messages.append({"role": "assistant","content": tool_response})
         return tool_response
-    
-    else:
-        return say_hello()
 
 while True:
     print("**********************************")

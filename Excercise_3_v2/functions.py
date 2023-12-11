@@ -3,7 +3,7 @@ def say_hello():
 
     """Saluda al usuario cada vez que empieza una conversación o cuando el usuario lo solicite"""
 
-    prompt = f"""Hola, soy un bot de Movistar, ¿En que te puedo ayudar?"""
+    prompt = f"""¡Hola! Bienvenid@ al chat de Movistar!\nEstoy para ayudare en:\n• Conocer detalle de tu deuda\n• Formas y lugares de pago\n• Solicitar Recibo\nComentanos, ¿Qué necesitas?"""
 
     return prompt
 
@@ -20,14 +20,6 @@ def out_of_context():
     """Responde cuando el usuario pregunta algo que no está dentro de las funciones que el bot puede realizar"""
 
     prompt = """\nEl tema que me preguntas no está dentro de mi contexto,\npor favor pregunta algo que esté relacionado con las funciones que\nte mostré al anteriormente"""
-
-    return prompt
-
-def show_options():
-
-    """Muestra las funciones que el bot puede realizar"""
-
-    prompt = """\nEstoy para ayudare en:\n• Conocer detalle de tu deuda\n• Formas y lugares de pago\n• Solicitar Recibo\n"""
 
     return prompt
 
