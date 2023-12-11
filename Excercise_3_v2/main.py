@@ -170,6 +170,7 @@ def get_completion(messages):
                 tool_response = tool_to_call
                 messages.append({"role": "assistant","content": tool_response})
         return tool_response
+    return out_of_context()
 
 while True:
     print("**********************************")

@@ -11,14 +11,14 @@ def ask_dni():
 
     """Pregunta el DNI del usuario"""
 
-    prompt = """\nPor favor ingresa tu DNI, Recuerda que el DNI debe tener 9 dígitos"""
+    prompt = """\nPor favor ingresa tu DNI, recuerda que el DNI debe tener 9 caracteres"""
     return prompt
 
 def validate_dni(dni):
     
     """Valida el DNI del usuario"""
 
-    prompt = "DNI Inválido, ingrese nuevamente"
+    prompt = ask_dni()
     available_dni = ["123456789", "987654321"]
 
     if len(dni) == 9:
@@ -27,24 +27,11 @@ def validate_dni(dni):
 
     return prompt
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 def out_of_context():
 
     """Responde cuando el usuario pregunta algo que no está dentro de las funciones que el bot puede realizar"""
 
-    prompt = """\nEl tema que me preguntas no está dentro de mi contexto,\npor favor pregunta algo que esté relacionado con las funciones que\nte mostré al anteriormente"""
+    prompt = """Lo siento no puedo responder a eso."""
 
     return prompt
 
