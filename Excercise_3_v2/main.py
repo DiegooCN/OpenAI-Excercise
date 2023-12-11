@@ -1,7 +1,7 @@
 import os
 import json
 
-from functions import say_hello , out_of_context , get_method_payment_locations , get_receipt, say_goodbye, get_debt_detail, ask_dni, validate_dni
+from functions import say_hello , out_of_context , get_method_payment_locations , get_receipt, say_goodbye, get_debt_detail, ask_dni, to_many_tries, validate_dni
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -21,7 +21,9 @@ behavior = """Eres un asistente de Movistar y debes seguir las siguientes fases 
     > Fase 3: \
         - Despedirse del usuario cuando este lo solicite.\
     REGLAS: \
-        - No puedes mostrar el recibo, deuda o formas/lugares de pago sin antes haber validado el DNI del usuario."""
+        - No puedes mostrar el recibo, deuda o formas/lugares de pago sin antes haber validado el DNI del usuario.\
+        - Si el usuario ingresa un mensaje sin sentido, decirle que esta fuera de contexto.\
+        - Si el usuario se equivoca 3 veces al ingresar el DNI llamar a la función 'to_many_tries'"""
 
 messages = [
     {"role": "system", "content": behavior},
@@ -34,6 +36,7 @@ functions = {
         "get_receipt": get_receipt(),
         "say_goodbye": say_goodbye(),
         "ask_dni": ask_dni(),
+        "to_many_tries":to_many_tries()
     }
 
 functions_with_args = {
@@ -142,6 +145,17 @@ def get_completion(messages):
                     "required": ["dni"],
                 },
                 
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "to_many_tries",
+                "description": "El usuario ingresa más de dos veces un DNI incorrecto",
+                "parameters": {
+                    "type": "object",
+                    "properties": {},
+                },
             },
         },
     ]

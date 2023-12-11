@@ -11,18 +11,19 @@ def ask_dni():
 
     """Pregunta el DNI del usuario"""
 
-    prompt = """\nPor favor ingresa tu DNI, recuerda que el DNI debe tener 9 caracteres"""
+    prompt = """Necesito consultar algunos datos para continuar con tu consulta. Por favor, ingresa el documento de identidad del titular del servicio."""
     return prompt
 
 def validate_dni(dni):
     
     """Valida el DNI del usuario"""
 
-    prompt = ask_dni()
-    available_dni = ["123456789", "987654321"]
+    prompt = """No fue posible validar tu identidad. Por favor intenta nuevamente"""
+    available_dni = ["123456789", " 987654321"]
 
     if len(dni) == 9:
         if dni in available_dni:
+            tryCount = 0
             prompt = say_hello()
 
     return prompt
@@ -66,5 +67,13 @@ def say_goodbye():
     """Se despide del usuario cuando este lo solicite"""
 
     prompt = """\nGracias por usar el servicio de asistencia de Movistar\n¡Hasta pronto!"""
+
+    return prompt
+
+def to_many_tries():
+
+    """El usuario ingresa más de dos veces un DNI incorrecto"""
+
+    prompt = """Disculpa no pudimos validar tu identidad. Intenta más tarde.\nQue tengas un buen día."""
 
     return prompt
