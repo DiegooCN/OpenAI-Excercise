@@ -7,13 +7,38 @@ def say_hello():
 
     return prompt
 
-def say_goodbye():
+def ask_dni():
 
-    """Se despide del usuario cuando este lo solicite"""
+    """Pregunta el DNI del usuario"""
 
-    prompt = """\nGracias por usar el servicio de asistencia de Movistar\n¡Hasta pronto!"""
+    prompt = """\nPor favor ingresa tu DNI, Recuerda que el DNI debe tener 9 dígitos"""
+    return prompt
+
+def validate_dni(dni):
+    
+    """Valida el DNI del usuario"""
+
+    prompt = "DNI Inválido, ingrese nuevamente"
+    available_dni = ["123456789", "987654321"]
+
+    if len(dni) == 9:
+        if dni in available_dni:
+            prompt = say_hello()
 
     return prompt
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def out_of_context():
 
@@ -49,9 +74,10 @@ def get_debt_detail(dni):
         prompt = f"""\nTu DNI: {dni} no se encuentra registrado en nuestra base de datos\nPor favor ingresa un DNI válido"""
     return prompt
 
-def ask_dni():
+def say_goodbye():
 
-    """Pregunta el DNI del usuario"""
+    """Se despide del usuario cuando este lo solicite"""
 
-    prompt = """\nPor favor ingresa tu DNI, Recuerda que el DNI debe tener 9 dígitos"""
+    prompt = """\nGracias por usar el servicio de asistencia de Movistar\n¡Hasta pronto!"""
+
     return prompt
