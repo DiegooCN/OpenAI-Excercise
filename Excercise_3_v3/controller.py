@@ -9,7 +9,7 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 tries = 0
 
-def function_handler(messages, function):
+def function_handler(messages, function, user_prompt):
     """
     Retorna un mensaje especifico
     
@@ -25,7 +25,7 @@ def function_handler(messages, function):
     if function == "say_hello":
         prompt = say_hello()
     elif function == "get_debt_detail":
-        dni = json.loads(get_dni_from_messages(messages))["dni"]
+        dni = json.loads(get_dni_from_user_prompt(messages))["dni"]
         print(dni)
         if is_dni_valid(dni):
             prompt = get_debt_detail(dni)
@@ -84,22 +84,14 @@ def say_goodbye():
     return prompt
 
 
-def get_dni_from_messages(messages):
+def get_dni_from_user_prompt(user_prompt):
 
-    user_messages = []
-
-    for message in messages:
-        if message["role"] != "system":
-            user_messages.append(message["content"])
-
-    avaliable_dni = ["123456789", "205314385"]
 
     behavior = f"""\
-    Tu objetivo es analizar la siguiente lista de mensajes {user_messages} e identificar el DNI del usuario.\
-    Luego comparalos con los siguientes DNIs {avaliable_dni}\
-    Si existe un DNI en la lista de DNIs, debes mostrar el DNI en el siguiente formato JSON:\
-    {{"dni": "dni del usuario","thought": "razonamiento"}}\
-    DNI default: 0\
+    Tu objetivo es analizar el siguiente prompt {user_prompt} e identificar el DNI del usuario.\
+    Luego deberás retornar un json con el siguiente formato:\
+    {{"dni": "dni del usuario"}}\
+    Si el usuario no ingresa un DNI este será "0"
     """
 
     response = client.chat.completions.create(
@@ -115,5 +107,4 @@ def is_dni_valid(dni):
     
     dni_with_debts = ["123456789", "205314385"]
     flag = True if dni in dni_with_debts else False
-
     return flag

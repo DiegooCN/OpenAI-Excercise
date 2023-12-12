@@ -43,11 +43,15 @@ def get_completion(messages):
                             "type": "string",
                             "description": "The function to be executed.",
                         },
+                        "user_promt": {
+                            "type": "string",
+                            "description": "The user prompt to be used in the function.",
+                        },
                     },
-                    "required": ["function"],
+                    "required": ["function", "user_promt"],
                 },
             },
-        }
+        },
     ]
 
     response = client.chat.completions.create(
@@ -66,7 +70,7 @@ def get_completion(messages):
     tool_args = json.loads(response.choices[0].message.tool_calls[0].function.arguments)
     print("Action: " ,tool_args.get("function")) 
 
-    function_response = function_handler(messages=messages, function=tool_args.get("function"))
+    function_response = function_handler(messages=messages, function=tool_args.get("function"), user_prompt=tool_args.get("user_promt"))
 
     messages.append({"role": "assistant", "content": function_response})
 
@@ -75,8 +79,8 @@ def get_completion(messages):
 while True:
     print("**********************************")
     print(get_completion(messages))
-    user_input = input("User: ")
-    messages.append({"role": "user", "content": user_input})
+    user_prompt = input("User: ")
+    messages.append({"role": "user", "content": user_prompt})
 
 
     
