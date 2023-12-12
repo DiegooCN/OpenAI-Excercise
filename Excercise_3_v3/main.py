@@ -1,7 +1,7 @@
 import os
 import json
 
-from functions import say_hello , out_of_context , get_method_payment_locations , get_receipt, say_goodbye, get_debt_detail, ask_dni, to_many_tries, validate_dni
+from controller import function_handler
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -9,56 +9,68 @@ load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-behavior = """Tu objetivo es clasificar analizar lo que dice el usuario y responder con la función que más se adecue a ella. \
+behavior = """Tu objetivo es clasificar analizar lo que dice el usuario y responder con el nombre de la función que más se adecue a ella. \
     Las funciones que puedes utilizar son: \
-        > Saludar \
-        > Preguntar por DNI \
-        > Métodos y lugares de pago \
-        > Obtener recibo \
-        > Despedirse \
-        > Obtener detalle deuda \
-        > Fuera de contexto \
-    Solo puedes devolver el nombre de las funciones."""
+        > say_hello \
+        > method_payment \
+        > payment_places \
+        > say_goodbye \
+        > get_debt_detail \
+        > out_of_context \
+    Ejemplo:\
+        > User: Hola\
+        > Assistant: say_hello\
+        > User: Quiero pagar mi deuda\
+        > Assistant: get_debt_detail"""
 
 messages = [
     {"role": "system", "content": behavior},
-    {"role": "system", "content": "say_hello"},
-]
-
-tools=[
-    {
-        "type": "function",
-        "function": {
-            "name": "function_handler",
-            "description": "Retorna un mensaje especifico",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "messages": {
-                        "type": "array",
-                    }
-                },
-            },
-        },
-    }
+    {"role": "assistant", "content": "say_hello"},
 ]
 
 def get_completion(messages):
+
+    tools=[
+        {
+            "type": "function",
+            "function": {
+                "name": "function_handler",
+                "description": "Returns a message based on the user input.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "function": {
+                            "type": "string",
+                            "description": "The function to be executed.",
+                        },
+                    },
+                    "required": ["function"],
+                },
+            },
+        }
+    ]
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-1106",
         messages=messages,
         tools=tools,
         tool_choice={
-            "function": "function_handler",
+            "type": "function",
+            "function": {
+                "name": "function_handler"
+            }
         }
     )
 
-    message_response = response.choices[0].message.content
 
-    messages.append({"role": "assistant", "content": message_response})
+    tool_args = json.loads(response.choices[0].message.tool_calls[0].function.arguments)
+    print("Action: " ,tool_args.get("function")) 
 
-    return message_response
+    function_response = function_handler(messages=messages, function=tool_args.get("function"))
+
+    messages.append({"role": "assistant", "content": function_response})
+
+    return function_response
 
 while True:
     print("**********************************")
